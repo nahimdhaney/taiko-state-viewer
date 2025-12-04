@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ChainStatusCard } from '@/components/chain-status-card';
 import { CheckpointTable } from '@/components/checkpoint-table';
 import { ProofChecker } from '@/components/proof-checker';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw } from 'lucide-react';
 
@@ -77,6 +78,7 @@ export default function Home() {
                 </Badge>
               )}
               <Badge variant="outline">Auto-refresh: 5s</Badge>
+              <ThemeToggle />
             </div>
           </div>
         </div>
