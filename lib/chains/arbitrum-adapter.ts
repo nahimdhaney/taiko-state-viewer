@@ -37,17 +37,32 @@ export class ArbitrumAdapter implements ChainAdapter {
 
   async getStatus(direction: 'l1ToL2' | 'l2ToL1'): Promise<ChainStatus> {
     try {
-      const checkpoints = await this.getCheckpoints(direction, 1);
+      // For L1→L2: source is L1
+      // For L2→L1: source is L2
+      const sourceClient = direction === 'l1ToL2' ? this.getL1Client() : this.getL2Client();
+
+      const [checkpoints, currentBlockBigInt] = await Promise.all([
+        this.getCheckpoints(direction, 1),
+        sourceClient.getBlockNumber(),
+      ]);
+
+      const currentBlock = Number(currentBlockBigInt);
+      const latestCheckpoint = checkpoints[0] || null;
+      const blocksBehind = latestCheckpoint
+        ? currentBlock - latestCheckpoint.blockNumber
+        : undefined;
 
       return {
         chainName: this.config.name,
         direction,
         isConnected: true,
-        latestCheckpoint: checkpoints[0] || null,
+        latestCheckpoint,
         totalCheckpoints: checkpoints.length,
         contractAddress: direction === 'l1ToL2'
           ? this.config.contracts.l2.address  // ArbSys on L2 for L1→L2
           : this.config.contracts.l1.address, // Outbox on L1 for L2→L1
+        currentBlock,
+        blocksBehind,
       };
     } catch (error) {
       return {

@@ -103,16 +103,41 @@ function StatusCard({
       <CardContent className="pt-4 space-y-3">
         {data?.latestCheckpoint ? (
           <>
+            {data.currentBlock && (
+              <div>
+                <p className="text-sm text-muted-foreground">Current Block</p>
+                <p className="text-2xl font-bold tabular-nums">
+                  {data.currentBlock.toLocaleString()}
+                </p>
+              </div>
+            )}
             <div>
               <p className="text-sm text-muted-foreground">Latest Checkpointed Block</p>
-              <p className="text-2xl font-bold tabular-nums">
+              <p className="text-xl font-semibold tabular-nums">
                 {data.latestCheckpoint.blockNumber.toLocaleString()}
               </p>
+              <p className="font-mono text-xs text-muted-foreground">
+                {formatHash(data.latestCheckpoint.blockHash, 12)}
+              </p>
+              {data.latestCheckpoint.timestamp && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formatTimeAgo(data.latestCheckpoint.timestamp)}
+                </p>
+              )}
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Block Hash</p>
-              <p className="font-mono text-xs">{formatHash(data.latestCheckpoint.blockHash, 16)}</p>
-            </div>
+            {data.blocksBehind !== undefined && (
+              <div>
+                <p className="text-sm text-muted-foreground">Blocks Behind</p>
+                <div className="flex items-center gap-2">
+                  <span className={`text-lg font-semibold ${data.blocksBehind > 100 ? 'text-yellow-500' : 'text-green-500'}`}>
+                    {data.blocksBehind} blocks
+                  </span>
+                  {data.blocksBehind <= 100 && (
+                    <Badge variant="success" className="text-xs">Synced</Badge>
+                  )}
+                </div>
+              </div>
+            )}
             {data.latestCheckpoint.stateRoot && (
               <div>
                 <p className="text-sm text-muted-foreground">State Root</p>
@@ -124,11 +149,6 @@ function StatusCard({
                 <p className="text-sm text-muted-foreground">Send Root</p>
                 <p className="font-mono text-xs">{formatHash(data.latestCheckpoint.sendRoot, 16)}</p>
               </div>
-            )}
-            {data.latestCheckpoint.timestamp && (
-              <p className="text-xs text-muted-foreground">
-                {formatTimeAgo(data.latestCheckpoint.timestamp)}
-              </p>
             )}
           </>
         ) : (

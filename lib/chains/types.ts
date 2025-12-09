@@ -18,6 +18,8 @@ export interface ChainStatus {
   latestCheckpoint: Checkpoint | null;
   totalCheckpoints: number;
   contractAddress: string;
+  currentBlock?: number;  // Current block on the source chain
+  blocksBehind?: number;  // How many blocks behind the checkpoint is
   error?: string;
 }
 

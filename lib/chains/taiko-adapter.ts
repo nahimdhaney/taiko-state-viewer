@@ -35,22 +35,33 @@ export class TaikoAdapter implements ChainAdapter {
 
   async getStatus(direction: 'l1ToL2' | 'l2ToL1'): Promise<ChainStatus> {
     try {
-      // For L1→L2: we read checkpoints on L2 (L1 state saved on L2)
-      // For L2→L1: we read checkpoints on L1 (L2 state saved on L1)
-      const client = direction === 'l1ToL2' ? this.getL2Client() : this.getL1Client();
+      // For L1→L2: we read checkpoints on L2 (L1 state saved on L2), source is L1
+      // For L2→L1: we read checkpoints on L1 (L2 state saved on L1), source is L2
+      const sourceClient = direction === 'l1ToL2' ? this.getL1Client() : this.getL2Client();
       const contractAddress = direction === 'l1ToL2'
         ? this.config.contracts.l2.address
         : this.config.contracts.l1.address;
 
-      const checkpoints = await this.getCheckpoints(direction, 1);
+      const [checkpoints, currentBlockBigInt] = await Promise.all([
+        this.getCheckpoints(direction, 1),
+        sourceClient.getBlockNumber(),
+      ]);
+
+      const currentBlock = Number(currentBlockBigInt);
+      const latestCheckpoint = checkpoints[0] || null;
+      const blocksBehind = latestCheckpoint
+        ? currentBlock - latestCheckpoint.blockNumber
+        : undefined;
 
       return {
         chainName: this.config.name,
         direction,
         isConnected: true,
-        latestCheckpoint: checkpoints[0] || null,
+        latestCheckpoint,
         totalCheckpoints: checkpoints.length,
         contractAddress,
+        currentBlock,
+        blocksBehind,
       };
     } catch (error) {
       return {
