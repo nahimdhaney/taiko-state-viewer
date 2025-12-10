@@ -5,6 +5,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { NetworkToggle } from '@/components/network-toggle';
 import { Badge } from '@/components/ui/badge';
 import { supportedChains } from '@/lib/chains/registry';
+import { Github } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -42,8 +43,17 @@ export default function Home() {
             Rollup State Viewer — Multi-chain cross-chain checkpoint monitoring
           </p>
           <p className="mt-1">
-            Supported: Taiko, Arbitrum
+            Supported: Taiko, Arbitrum, Linea
           </p>
+          <a
+            href="https://github.com/nahimdhaney/rollup-state-viewer"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 mt-3 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Github className="h-4 w-4" />
+            <span>View on GitHub</span>
+          </a>
         </footer>
       </div>
     </main>

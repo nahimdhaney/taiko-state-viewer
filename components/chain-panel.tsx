@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +24,8 @@ import { ProofGenerator } from './proof-generator';
 interface ChainPanelProps {
   chainId: string;
   isActive: boolean;
+  initialDirection?: 'l1ToL2' | 'l2ToL1';
+  onDirectionChange?: (direction: 'l1ToL2' | 'l2ToL1') => void;
 }
 
 function formatHash(hash: string, length: number = 10): string {
@@ -297,10 +299,24 @@ function CheckpointsTable({
   );
 }
 
-export function ChainPanel({ chainId, isActive }: ChainPanelProps) {
-  const [direction, setDirection] = useState<'l1ToL2' | 'l2ToL1'>('l2ToL1');
+export function ChainPanel({ chainId, isActive, initialDirection, onDirectionChange }: ChainPanelProps) {
+  const [direction, setDirection] = useState<'l1ToL2' | 'l2ToL1'>(initialDirection || 'l2ToL1');
   const { network } = useNetwork();
   const config = getChainConfig(chainId, network);
+
+  // Sync direction when initialDirection changes (from URL hash)
+  useEffect(() => {
+    if (initialDirection && initialDirection !== direction) {
+      setDirection(initialDirection);
+    }
+  }, [initialDirection]);
+
+  // Handle direction change
+  const handleDirectionChange = (newDirection: string) => {
+    const dir = newDirection as 'l1ToL2' | 'l2ToL1';
+    setDirection(dir);
+    onDirectionChange?.(dir);
+  };
 
   if (!config) {
     return <div>Unknown chain: {chainId}</div>;
@@ -309,7 +325,7 @@ export function ChainPanel({ chainId, isActive }: ChainPanelProps) {
   return (
     <div className="space-y-6">
       {/* Direction Tabs */}
-      <Tabs value={direction} onValueChange={(v) => setDirection(v as 'l1ToL2' | 'l2ToL1')}>
+      <Tabs value={direction} onValueChange={handleDirectionChange}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="l1ToL2" disabled={!config.directions.l1ToL2}>
             L1 → L2
